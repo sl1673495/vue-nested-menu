@@ -11,7 +11,8 @@
     </div>
     <nest-menu
       :key="activeId"
-      v-if="activeId !== null"
+      v-if="activeId"
+      :defaultActiveIds="defaultActiveIds"
       :data="getActiveSubMenu()"
       :depth="depth + 1"
       @change="activeIdChange"
@@ -31,10 +32,17 @@ export default {
       type: Number,
       default: 0,
     },
+    defaultActiveIds: {
+      type: Array,
+    },
   },
   data() {
+    let defaultActiveId = null;
+    if (this.defaultActiveIds) {
+      defaultActiveId = this.defaultActiveIds[this.depth];
+    }
     return {
-      activeId: null,
+      activeId: defaultActiveId,
     };
   },
   created() {},
