@@ -40,6 +40,7 @@ export default {
     let defaultActiveId = null;
     if (this.defaultActiveIds) {
       defaultActiveId = this.defaultActiveIds[this.depth];
+      this.defaultActiveIds[this.depth] = null;
     }
     return {
       activeId: defaultActiveId,
@@ -51,7 +52,11 @@ export default {
       this.activeId = menuItem.id;
     },
     getActiveSubMenu() {
-      return this.data.find(({ id }) => id === this.activeId)._child;
+      const menu = this.data.find(({ id }) => id === this.activeId);
+      if (menu) {
+        return menu._child;
+      }
+      return null;
     },
     getActiveClass(id) {
       if (id === this.activeId) {
