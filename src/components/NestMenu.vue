@@ -34,7 +34,6 @@ export default {
   name: "NestMenu",
   props: ["data", "depth", "defaultActiveIds"],
   setup(props: IProps, context) {
-    console.log('props: ', props);
     const { depth = 0, defaultActiveIds } = props;
     const defaultActiveId = defaultActiveIds ? defaultActiveIds[depth] : null;
     const activeId = ref<number | null | undefined>(defaultActiveId);
