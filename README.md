@@ -8,6 +8,8 @@
 
 ## 需求
 
+可以先在 [Github Pages](https://sl1673495.github.io/vue-nested-menu/) 中预览一下效果。
+
 需求是这样的，后端会返回一串可能有无限层级的菜单，格式如下：
 
 ```js
@@ -284,7 +286,7 @@ export default {
      * 样式相关
      */
     const getActiveSubMenu = () => {
-      return data.find(({ id }) => id === activeId.value)._child;
+      return props.data.find(({ id }) => id === activeId.value)?._child;
     };
     const getActiveClass = (id) => {
       if (id === activeId.value) {
