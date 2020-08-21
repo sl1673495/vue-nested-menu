@@ -1,6 +1,5 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <nest-menu :data="menu" @change="activeIdChange"/>
+  <nest-menu :data="menu" @change="activeIdsChange" />
 </template>
 
 <script>
@@ -15,7 +14,7 @@ export default {
     };
   },
   methods: {
-    activeIdChange(ids) {
+    activeIdsChange(ids) {
       console.log("当前选中的id路径", ids);
     },
   },
