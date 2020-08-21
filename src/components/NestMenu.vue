@@ -11,9 +11,10 @@
     </div>
     <nest-menu
       :key="activeId"
-      v-if="activeId !== null"
+      v-if="activeId"
       :data="getActiveSubMenu()"
       :depth="depth + 1"
+      :defaultActiveIds="defaultActiveIds"
       @change="onSubActiveIdChange"
     ></nest-menu>
   </div>
@@ -26,15 +27,17 @@ import data from "../menu";
 interface IProps {
   data: typeof data;
   depth: number;
+  defaultActiveIds?: number[];
 }
 
 export default {
   name: "NestMenu",
-  props: ["data", "depth"],
+  props: ["data", "depth", "defaultActiveIds"],
   setup(props: IProps, context) {
-    const { depth = 0 } = props;
-
-    const activeId = ref<number | null>(null);
+    console.log('props: ', props);
+    const { depth = 0, defaultActiveIds } = props;
+    const defaultActiveId = defaultActiveIds ? defaultActiveIds[depth] : null;
+    const activeId = ref<number | null | undefined>(defaultActiveId);
 
     const onMenuItemClick = (menuItem) => {
       activeId.value = menuItem.id;
@@ -60,7 +63,9 @@ export default {
       return "";
     };
 
-    // 菜单数据源发生变化的时候 默认选中当前层级的第一项
+    /**
+     * 菜单数据源发生变化的时候 默认选中当前层级的第一项
+     */
     watch(
       () => props.data,
       (newData) => {
@@ -75,21 +80,29 @@ export default {
       }
     );
 
+    /**
+     * 递归收集子菜单第一项的 id
+     */
+    const getSubIds = (child) => {
+      const subIds = [];
+      const traverse = (data) => {
+        if (data && data.length) {
+          const first = data[0];
+          subIds.push(first.id);
+          traverse(first._child);
+        }
+      };
+      traverse(child);
+      return subIds;
+    };
+
     watch(
       () => activeId.value,
       (newId) => {
         // 这里需要递归找到这层菜单以下的子菜单的 activeId 拼接在后面
         // 直接默认找第一个即可
         const child = getActiveSubMenu();
-        const subIds = [];
-        const traverse = (data) => {
-          if (data && data.length) {
-            const first = data[0];
-            subIds.push(first.id);
-            traverse(first._child);
-          }
-        };
-        traverse(child);
+        const subIds = getSubIds(child);
         // 把子菜单的 ids 也拼接起来 向父组件 emit
         context.emit("change", [newId, ...subIds]);
       }
