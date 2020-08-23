@@ -35,8 +35,19 @@ export default {
   props: ["data", "depth", "defaultActiveIds"],
   setup(props: IProps, context) {
     const { depth = 0, defaultActiveIds } = props;
-    const defaultActiveId = defaultActiveIds ? defaultActiveIds[depth] : null;
-    const activeId = ref<number | null | undefined>(defaultActiveId);
+    const activeId = ref<number | null | undefined>(null);
+    watch(
+      () => defaultActiveIds,
+      (newDefaultActiveIds) => {
+        const newActiveId = newDefaultActiveIds[depth];
+        if (newActiveId) {
+          activeId.value = newActiveId;
+        }
+      },
+      {
+        immediate: true,
+      }
+    );
 
     const onMenuItemClick = (menuItem) => {
       activeId.value = menuItem.id;
