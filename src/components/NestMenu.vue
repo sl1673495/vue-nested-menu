@@ -11,35 +11,35 @@
     </div>
     <nest-menu
       :key="activeId"
-      v-if="activeId"
-      :data="getActiveSubMenu()"
+      v-if="subMenu && subMenu.length"
+      :data="subMenu"
       :depth="depth + 1"
-      :defaultActiveIds="defaultActiveIds"
+      :activeIds="activeIds"
       @change="onSubActiveIdChange"
     ></nest-menu>
   </div>
 </template>
 
 <script lang="ts">
-import { watch, ref } from "vue";
+import { watch, ref, onMounted, computed } from "vue";
 import data from "../menu";
 
 interface IProps {
   data: typeof data;
   depth: number;
-  defaultActiveIds?: number[];
+  activeIds?: number[];
 }
 
 export default {
   name: "NestMenu",
-  props: ["data", "depth", "defaultActiveIds"],
+  props: ["data", "depth", "activeIds"],
   setup(props: IProps, context) {
-    const { depth = 0, defaultActiveIds } = props;
+    const { depth = 0, activeIds } = props;
     const activeId = ref<number | null | undefined>(null);
     watch(
-      () => defaultActiveIds,
-      (newDefaultActiveIds) => {
-        const newActiveId = newDefaultActiveIds[depth];
+      () => activeIds,
+      (newActiveIds) => {
+        const newActiveId = newActiveIds[depth];
         if (newActiveId) {
           activeId.value = newActiveId;
         }
@@ -50,7 +50,14 @@ export default {
     );
 
     const onMenuItemClick = (menuItem) => {
-      activeId.value = menuItem.id;
+      const newActiveId = menuItem.id;
+      if (newActiveId !== activeId.value) {
+        activeId.value = newActiveId;
+        const child = getActiveSubMenu();
+        const subIds = getSubIds(child);
+        // 把子菜单的默认第一项 ids 也拼接起来 向父组件 emit
+        context.emit("change", [newActiveId, ...subIds]);
+      }
     };
     /**
      * 接受到子组件更新 activeId 的同时
@@ -59,13 +66,14 @@ export default {
     const onSubActiveIdChange = (ids) => {
       context.emit("change", [activeId.value].concat(ids));
     };
+    const getActiveSubMenu = () => {
+      return props.data?.find(({ id }) => id === activeId.value)._child;
+    };
+    const subMenu = computed(getActiveSubMenu);
 
     /**
      * 样式相关
      */
-    const getActiveSubMenu = () => {
-      return props.data.find(({ id }) => id === activeId.value)?._child;
-    };
     const getActiveClass = (id) => {
       if (id === activeId.value) {
         return "menu-active";
@@ -107,14 +115,10 @@ export default {
     };
 
     watch(
-      () => activeId.value,
-      (newId) => {
-        // 这里需要递归找到这层菜单以下的子菜单的 activeId 拼接在后面
-        // 直接默认找第一个即可
-        const child = getActiveSubMenu();
-        const subIds = getSubIds(child);
-        // 把子菜单的 ids 也拼接起来 向父组件 emit
-        context.emit("change", [newId, ...subIds]);
+      () => props.activeIds,
+      (newIds) => {
+        const currentActiveId = newIds[depth];
+        activeId.value = currentActiveId;
       }
     );
 
@@ -122,7 +126,7 @@ export default {
       depth,
       activeId,
       onMenuItemClick,
-      getActiveSubMenu,
+      subMenu,
       getActiveClass,
       onSubActiveIdChange,
     };

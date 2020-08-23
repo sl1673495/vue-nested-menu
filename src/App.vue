@@ -1,5 +1,5 @@
 <template>
-  <nest-menu :data="data" :defaultActiveIds="ids" @change="activeIdsChange" />
+  <nest-menu :data="data" :activeIds="ids" @change="activeIdsChange" />
 </template>
 
 <script>
@@ -46,6 +46,7 @@ export default {
   },
   methods: {
     activeIdsChange(ids) {
+      this.ids = ids;
       console.log("当前选中的id路径", ids);
     },
   },
