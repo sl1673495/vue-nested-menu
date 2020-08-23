@@ -52,6 +52,7 @@ export default {
       },
       {
         immediate: true,
+        flush: 'sync'
       }
     );
 
@@ -66,9 +67,16 @@ export default {
             activeId.value = newData[0].id;
           }
         }
+        // 如果当前层级的 data 中遍历无法找到 `activeId` 的值 说明这个值失效了
+        // 把它调整成数据源中第一个子菜单项的 id
+        if (!props.data.find(({ id }) => id === activeId.value)) {
+          activeId.value = props.data?.[0].id;
+        }
       },
       {
         immediate: true,
+        // 在观测到数据变动之后 同步执行 这样会防止渲染发生错乱
+        flush: "sync",
       }
     );
 
