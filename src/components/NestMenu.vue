@@ -35,13 +35,36 @@ export default {
   props: ["data", "depth", "activeIds"],
   setup(props: IProps, context) {
     const { depth = 0, activeIds } = props;
+
+    /**
+     * 这里 activeIds 也可能是异步获取到的 所以用 watch 保证初始化
+     */
     const activeId = ref<number | null | undefined>(null);
     watch(
       () => activeIds,
       (newActiveIds) => {
-        const newActiveId = newActiveIds[depth];
-        if (newActiveId) {
-          activeId.value = newActiveId;
+        if (newActiveIds) {
+          const newActiveId = newActiveIds[depth];
+          if (newActiveId) {
+            activeId.value = newActiveId;
+          }
+        }
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    /**
+     * 菜单数据源发生变化的时候 默认选中当前层级的第一项
+     */
+    watch(
+      () => props.data,
+      (newData) => {
+        if (!activeId.value) {
+          if (newData && newData.length) {
+            activeId.value = newData[0].id;
+          }
         }
       },
       {
@@ -82,23 +105,6 @@ export default {
     };
 
     /**
-     * 菜单数据源发生变化的时候 默认选中当前层级的第一项
-     */
-    watch(
-      () => props.data,
-      (newData) => {
-        if (!activeId.value) {
-          if (newData && newData.length) {
-            activeId.value = newData[0].id;
-          }
-        }
-      },
-      {
-        immediate: true,
-      }
-    );
-
-    /**
      * 递归收集子菜单第一项的 id
      */
     const getSubIds = (child) => {
@@ -114,27 +120,27 @@ export default {
       return subIds;
     };
 
-    watch(
-      () => props.activeIds,
-      (newIds) => {
-        const currentActiveId = newIds[depth];
-        activeId.value = currentActiveId;
-      }
-    );
-
     return {
       depth,
       activeId,
-      onMenuItemClick,
       subMenu,
-      getActiveClass,
+      onMenuItemClick,
       onSubActiveIdChange,
+      getActiveClass,
     };
   },
 };
 </script>
 
 <style>
+.wrap {
+  padding: 12px 0;
+}
+
+.menu-wrap {
+  display: flex;
+}
+
 .menu-wrap-0 {
   background: #ffccc7;
 }
@@ -145,14 +151,6 @@ export default {
 
 .menu-wrap-2 {
   background: #fcffe6;
-}
-
-.wrap {
-  padding: 12px 0;
-}
-
-.menu-wrap {
-  display: flex;
 }
 
 .menu-item {

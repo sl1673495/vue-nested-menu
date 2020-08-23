@@ -3,13 +3,14 @@
 </template>
 
 <script>
+import { ref } from "vue";
 import NestMenu from "./components/NestMenu.vue";
 import data from "./menu.js";
 import { getSubIds } from "./util";
 
 export default {
   name: "App",
-  data() {
+  setup() {
     // 假设默认选中 id 为 7
     const activeId = 7;
 
@@ -37,18 +38,18 @@ export default {
       return ids;
     };
 
-    const ids = findPath(data, activeId);
+    const ids = ref(findPath(data, activeId));
+
+    const activeIdsChange = (newIds) => {
+      ids.value = newIds;
+      console.log("当前选中的id路径", newIds);
+    };
 
     return {
-      data,
       ids,
+      activeIdsChange,
+      data,
     };
-  },
-  methods: {
-    activeIdsChange(ids) {
-      this.ids = ids;
-      console.log("当前选中的id路径", ids);
-    },
   },
   components: {
     NestMenu,
