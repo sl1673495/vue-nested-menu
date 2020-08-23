@@ -34,7 +34,7 @@ export default {
   name: "NestMenu",
   props: ["data", "depth", "activeIds"],
   setup(props: IProps, context) {
-    const { depth = 0, activeIds } = props;
+    const { depth = 0, activeIds, data } = props;
 
     /**
      * 这里 activeIds 也可能是异步获取到的 所以用 watch 保证初始化
@@ -139,6 +139,7 @@ export default {
 
 .menu-wrap {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .menu-wrap-0 {
@@ -156,6 +157,7 @@ export default {
 .menu-item {
   margin-left: 16px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .menu-active {
